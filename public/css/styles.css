@@ -29,13 +29,13 @@ input,textarea{
     width: 100%;
 }
 
-button{
+button , .btn-full{
     margin: 10px 0;
     color: #fff;
     background-color: #000;
     padding: 8px 10px;
     width: 100%;
-
+    text-align: center;
 }
 
 .mx-auto{
