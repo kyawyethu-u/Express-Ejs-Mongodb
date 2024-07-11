@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path")
 const bodyparser = require("body-parser");//body parsing middleware
+const mongoose = require("mongoose")
+const dotenv = require("dotenv").config();
 
 const app = express();
 //using "view engine" node server know/detect extenctions like .html/.ejs("ejs")
@@ -10,28 +12,17 @@ const app = express();
 const postRoutes = require("./routes/post");
 const adminRoutes = require("./routes/admin");
 
-const  {mongodbConnector} = require("./utils/database")
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyparser.urlencoded({extended: false}))
 // app.use(express.json());  //watching obj datas from form submit
 
-app.use("/post",(req,res,next)=>{
-    console.log("I am post middleware")
-    next();
-});
-app.use((req,res,next)=>{
-    console.log("I am parent middleware")
-    next();
-});
-app.use("/admin",(req,res,next)=>{
-    console.log("Admin middleware approved");
-    next();
-})
 
 app.use("/admin",adminRoutes);
 app.use(postRoutes);  
 
-
-mongodbConnector();
-app.listen(8080);
+mongoose.connect(process.env.MONGODB_URL)
+.then((res)=>{
+    app.listen(8080);
+    console.log("Connected to mongodb!!!");})
+.catch((err)=>console.log(err))
