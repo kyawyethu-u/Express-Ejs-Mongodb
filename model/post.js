@@ -15,6 +15,12 @@ const postSchema = new Schema({
     img_url: {
         type: String,
         required: true
+    },
+    //for linking models 
+    userId :{
+        type: Schema.Types.ObjectId,
+        ref: "User", //for data taken
+        required: true,
     }
 })
 

@@ -4,7 +4,7 @@ const Post = require("../model/post")
 exports.createPost =(req,res)=>{
     const {title,description,photo} = req.body;//destructure form's name's key
        //create({}),([{}]) for many
-       Post.create({title,description,img_url : photo})
+       Post.create({title,description,img_url : photo, userId : req.user})
        .then(result => {
         console.log(result);
         res.redirect("/");
@@ -26,9 +26,11 @@ exports.renderCreatePage = (req,res)=>{
 };
 
 exports.renderHomePage = (req,res)=>{
-    Post.find()
-    .then((posts)=>
-        res.render("home",{title: "homepage" ,postsArr: posts}))
+    Post.find().populate("userId", "username")
+    .then((posts)=>{
+        console.log(posts)
+    res.render("home",{title: "homepage" ,postsArr: posts})
+})
     .catch(err => console.log(err))
     
 }
