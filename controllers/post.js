@@ -26,10 +26,15 @@ exports.renderCreatePage = (req,res)=>{
 };
 
 exports.renderHomePage = (req,res)=>{
+    //isLogin=true
+    const cookie = req.get("Cookie").split("=")[1].trim() === "true" ;//split [isLogin,true] from isLogin=true ,=== for boolean 
+    console.log(cookie);
+   
+
     Post.find().populate("userId", "username")
     .then((posts)=>{
         console.log(posts)
-    res.render("home",{title: "homepage" ,postsArr: posts})
+    res.render("home",{title: "homepage" ,postsArr: posts,isLogin: cookie})
 })
     .catch(err => console.log(err))
     

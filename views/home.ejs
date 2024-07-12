@@ -1,7 +1,13 @@
 <%- include("./includes/head") %>
     <h1 class="title">Home page</h1>
     <p class="description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit velit harum dolorem sequi magni sapiente blanditiis excepturi cum ducimus officiis ullam cumque nostrum, natus totam odio a itaque? Quia, voluptatibus.</p>
+    
+    <% if(isLogin){ %>
+    
     <a href="/admin/create-post">Add a new post! </a>
+    <% } else { %>
+    <a href="/login">Create a new account </a>
+    <% } %>
     <hr/>
     
     <h1 class="title">Posts</h1>
@@ -10,6 +16,7 @@
             <h4>Nothing to see ?</h4>
             <p>Create a new post now !!! </p>
             <a href="/admin/create-post">Create a new post! </a>
+            
         </div>
         <% } %>
 
