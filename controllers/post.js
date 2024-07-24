@@ -26,15 +26,19 @@ exports.renderCreatePage = (req,res)=>{
 };
 
 exports.renderHomePage = (req,res)=>{
-    //isLogin=true
-    const cookie = req.get("Cookie").split("=")[1].trim() === "true" ;//split [isLogin,true] from isLogin=true ,=== for boolean 
-    console.log(cookie);
-   
-
+    //isLogin=true (cookie)
+      // [isLogin,true] cause of split()
+      // === "true" changed string to boolean
+    // const cookie = req.get("Cookie").split("=")[1].trim() === "true" ;//split [isLogin,true] from isLogin=true ,=== for boolean 
+  
+    console.log(req.session.isLogin);
     Post.find().populate("userId", "username")
     .then((posts)=>{
         console.log(posts)
-    res.render("home",{title: "homepage" ,postsArr: posts,isLogin: cookie})
+    res.render("home",{
+        title: "homepage" ,
+        postsArr: posts,
+        isLogin: req.session.isLogin ? true : false})//for ejs
 })
     .catch(err => console.log(err))
     

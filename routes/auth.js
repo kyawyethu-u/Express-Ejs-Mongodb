@@ -7,7 +7,7 @@ router.get("/login",authController.getLoginPage)
 
 router.post("/login",authController.postLoginData);
 
-
+router.post("/logout",authController.logout);
 
 
 

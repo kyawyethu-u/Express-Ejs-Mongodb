@@ -1,11 +1,12 @@
 <%- include("./includes/head") %>
     <h1 class="title">Home page</h1>
     <p class="description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit velit harum dolorem sequi magni sapiente blanditiis excepturi cum ducimus officiis ullam cumque nostrum, natus totam odio a itaque? Quia, voluptatibus.</p>
-    
     <% if(isLogin){ %>
-    
     <a href="/admin/create-post">Add a new post! </a>
-    <% } else { %>
+    <form action="/logout" method="post">
+        <button>Logout</button>
+    </form>
+    <% } else {%>
     <a href="/login">Create a new account </a>
     <% } %>
     <hr/>
@@ -24,7 +25,7 @@
     <div class="post-box">
         <div>
             <p class="post-title"><%= post.title%></p>
-            <p>Post by @<%= post.userId.username %></p>
+            <!-- <p>Post by @<%= post.userId.username%></p> -->
         </div>
         <p class="post-des">
          <a class="btn" href="/post/<%= post._id %>">See more...</a>

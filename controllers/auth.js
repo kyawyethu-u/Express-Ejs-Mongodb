@@ -5,6 +5,13 @@ exports.getLoginPage = (req,res) =>{
 
 //for create cookie form submit
 exports.postLoginData = (req,res) => {
-    res.setHeader("Set-Cookie","isLogin=true")//name,value
+    // res.setHeader("Set-Cookie","isLogin=true")//method,name,value
+    req.session.isLogin = true;
     res.redirect("/");
+}
+
+exports.logout = (req,res) =>{
+    req.session.destroy(_=>{
+        res.redirect("/");
+    })
 }
