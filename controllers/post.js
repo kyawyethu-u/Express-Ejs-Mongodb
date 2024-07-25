@@ -6,7 +6,6 @@ exports.createPost =(req,res)=>{
        //create({}),([{}]) for many
        Post.create({title,description,img_url : photo, userId : req.user})
        .then(result => {
-        console.log(result);
         res.redirect("/");
  }).catch(err => console.log(err))
    
@@ -34,7 +33,6 @@ exports.renderHomePage = (req,res)=>{
     console.log(req.session.isLogin);
     Post.find().populate("userId", "username")
     .then((posts)=>{
-        console.log(posts)
     res.render("home",{
         title: "homepage" ,
         postsArr: posts,

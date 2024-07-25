@@ -32,15 +32,6 @@ app.use(session({
     store,
 }))
 
-app.use((req,res,next)=>{
-    User.findById("668f9502c6179234006a7197")
-    .then(user => {
-        req.user = user ;//custom middleware
-        next();
-    })
-    .catch()
-   })
-
 
 
 app.use("/admin",adminRoutes);//route define
@@ -52,14 +43,7 @@ mongoose.connect(process.env.MONGODB_URL)//connecting to database
     app.listen(8080);
     console.log("Connected to mongodb!!!");
 
-    return User.findOne()
-    .then((user) => {if(!user){
-         User.create({
-            username: "kyaw",
-            email: "abcd@gmail.com", 
-            password: "abcd" })
-    }
-    return user})
+   
 })
-.then(result => console.log(result))
+// .then(result => console.log(result))
 .catch((err)=>console.log(err))

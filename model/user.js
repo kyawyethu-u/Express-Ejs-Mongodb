@@ -1,15 +1,9 @@
 const mongoose = require("mongoose")
 
 const {Schema,model} = mongoose
+//defined db'document'keys in User model
 
 const userSchema = new Schema({
-    username : {
-        type : String,
-        unique: true, //for not same 
-        required: true, //must
-        minLength: 3,
-        maxLength: 6
-    },
     email : {
         type : String,
         unique: true,
