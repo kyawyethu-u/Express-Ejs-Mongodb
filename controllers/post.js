@@ -1,42 +1,37 @@
+const post = require("../model/post");
 const Post = require("../model/post")
 
+//render create page
+exports.renderCreatePage = (req,res)=>{
+  
+    // res.sendFile(path.join(__dirname,"..","views","addpost.html"))
+    res.render("addpost",{title: "Post create"})//"addpost", value is must
 
+};
+
+//handle create post
 exports.createPost =(req,res)=>{
-    const {title,description,photo} = req.body;//destructure form's name's key
-       //create({}),([{}]) for many
+    const {title,description,photo} = req.body;
        Post.create({title,description,img_url : photo, userId : req.user})
        .then(result => {
         res.redirect("/");
  }).catch(err => console.log(err))
-   
-    // const post = new Post( title,description,photo);
-    // post
-    // .create()
-    // .then((result)=>{
-    //     console.log(result)
-    //      res.redirect('/')
-    //     })
-    // .catch(err => console.log(err));
 };
 
-exports.renderCreatePage = (req,res)=>{
-    // res.sendFile(path.join(__dirname,"..","views","addpost.html"))
-    res.render("addpost",{title: "Post create"})//"addpost", value is must
-};
-
+//render home page
 exports.renderHomePage = (req,res)=>{
-    //isLogin=true (cookie)
-      // [isLogin,true] cause of split()
-      // === "true" changed string to boolean
-    // const cookie = req.get("Cookie").split("=")[1].trim() === "true" ;//split [isLogin,true] from isLogin=true ,=== for boolean 
-  
-    console.log(req.session.isLogin);
-    Post.find().populate("userId", "username")
+    console.log(req.session.userInfo)
+    console.log(req.session.isLogin)
+    Post.find()
+    .select("title")
+    .populate("userId","email")
     .then((posts)=>{
     res.render("home",{
         title: "homepage" ,
         postsArr: posts,
-        isLogin: req.session.isLogin ? true : false})//for ejs
+        currentUserEmail : req.session.userInfo.email ?
+        req.session.userInfo.email: " ",
+        })
 })
     .catch(err => console.log(err))
     
@@ -47,7 +42,8 @@ exports.getPost = (req,res)=>{
     const postId = req.params.postId;
     Post.findById(postId)
     .then((post)=>
-        res.render("details", {title: post.title ,post}))
+        res.render("details", {title: post.title ,post,currentLoginUserId: req.session.userInfo.email ?
+            req.session.userInfo._id: " ",}))
     .catch(err => console.log(err))
     
 }
@@ -67,16 +63,20 @@ exports.getEditPost = (req,res) => {
 exports.updatePost = (req,res) => {
     const {postId,title,description,photo} = req.body;
     Post.findById(postId)
-    .then(post => {
+    .then((post) => {// .toString is used cause of (!==, obj id to string)
+        if(post.userId.toString() !== req.user._id.toString()){ 
+            return res.redirect ("/")
+        }
         post.title = title;
         post.description = description;
         post.img_url = photo;
-        return post.save() 
+        return post.save()
+          .then((result => {
+            console.log(result);
+            res.redirect("/");
+        }))
     })
-    .then((result => {
-        console.log(result);
-        res.redirect("/");
-    }))
+   
     .catch(err => console.log(err))
 
 }
@@ -84,11 +84,10 @@ exports.updatePost = (req,res) => {
 exports.deletePost = (req,res) => {
     const {postId} = req.params;
    
-    Post.findByIdAndDelete(postId)
+    Post.deleteOne({_id: postId, userId : req.user._id})
     .then(result => {
         console.log("Post deleted!!!");
         res.redirect("/");
     })
     .catch(err => console.log(err));
-
 }

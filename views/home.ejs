@@ -2,8 +2,9 @@
     <h1 class="title">Home page</h1>
     <p class="description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit velit harum dolorem sequi magni sapiente blanditiis excepturi cum ducimus officiis ullam cumque nostrum, natus totam odio a itaque? Quia, voluptatibus.</p>
     <% if(isLogin){ %>
-    <a href="/admin/create-post">Add a new post! </a>
+    <a href="/admin/create-post">Add a new post as <%=  currentUserEmail ? currentUserEmail: ""%> </a>
     <form action="/logout" method="post">
+      <input hidden value="<%= csrfToken%>" name="_csrf" />  
         <button>Logout</button>
     </form>
     <% } else {%>
@@ -13,7 +14,8 @@
     <hr/>
     
     <h1 class="title">Posts</h1>
-    <% if(postsArr.length===0) {%>
+
+    <% if(postsArr.length===0 && isLogin) {%>
         <div>
             <h4>Nothing to see ?</h4>
             <p>Create a new post now !!! </p>
@@ -22,13 +24,17 @@
         </div>
         <% } %>
 
+
     <% for(let post of postsArr) {%>    
+
     <div class="post-box">
         <div>
             <p class="post-title"><%= post.title%></p>
-            <!-- <p>Post by @<%= post.userId.username%></p> -->
+            <p>Post by => <%= post.userId.email %></p> 
+           
         </div>
         <p class="post-des">
+            
          <a class="btn" href="/post/<%= post._id %>">See more...</a>
         </p>
     </div>

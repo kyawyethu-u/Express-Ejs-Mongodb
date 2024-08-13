@@ -1,18 +1,19 @@
 <%- include("../includes/head") %>
    <section class="mx-auto">
-    <a href="/">Go back home</a>
-    <h1 class="title">Register a new account here</h1>
-    <% if(errorMsg) { %>
+    <a href="/">Go back login</a>
+    <h1 class="title">Reset Password</h1>
+    
+    <% if(errorMsg) {%>
         <p class="msg-box"><%= errorMsg %></p>
-        <% }%>
-    <form action="/register" method="post">
+        <% } %>
+
+    <form action="/reset" method="post">
         <input hidden value="<%= csrfToken%>" name="_csrf" /> 
+
         <div><label for="email">Enter email</label>
             <input type="text" id="email" name="email" ></div>
-        <div><label for="password">Enter password</label>
-                <input type="password" id="password" name="password" ></div>
-    
-        <button>Sign up</button>
+        
+        <button>Reset password</button>
         </form>
    </section>
    <%- include("../includes/foot")%>

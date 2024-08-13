@@ -73,3 +73,11 @@ align-items: center;
     font-size: 18px;
 
 }
+
+.msg-box{
+    text-align: center;
+    color: red;
+    border: 1px solid red;
+    background-color: rgb(245, 163, 163);
+    padding: 4px 10px;
+}
