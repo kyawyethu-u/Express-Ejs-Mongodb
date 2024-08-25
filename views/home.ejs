@@ -1,19 +1,44 @@
 <%- include("./includes/head") %>
-    <h1 class="title">Home page</h1>
-    <p class="description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit velit harum dolorem sequi magni sapiente blanditiis excepturi cum ducimus officiis ullam cumque nostrum, natus totam odio a itaque? Quia, voluptatibus.</p>
+    <section class="header">
+    <h1 class="title">Blog.io</h1>
+    <p class="description">Lorem ipsum dolor sit amet consectetur adipiscing elit lobortis scelerisque
+         magna ultricies, ac sagittis pellentesque iaculis senectus sollicitudin 
+         egestas dapibus aptent. Feugiat habitant interdum class felis velit platea fermentum 
+         himenaeos dignissim, curabitur ridiculus sed magna aptent metus odio lectus eu, porttitor
+          fusce risus netus ornare urna sociosqu nulla. Donec dictumst accumsan ad vulputate luctus
+           feugiat porta quis, iaculis semper volutpat egestas cubilia massa mi leo, aptent suspendisse
+            magna duis eleifend molestie nunc.Lorem ipsum dolor sit amet consectetur adipiscing elit lobortis scelerisque
+            magna ultricies, ac sagittis pellentesque iaculis senectus sollicitudin 
+            egestas dapibus aptent. Feugiat habitant interdum class felis velit platea fermentum 
+            himenaeos dignissim, curabitur ridiculus sed magna aptent metus odio lectus eu, porttitor
+             fusce risus netus ornare urna sociosqu nulla. Donec dictumst accumsan ad vulputate luctus
+              feugiat porta quis, iaculis semper volutpat egestas cubilia massa mi leo, aptent suspendisse
+               magna duis eleifend molestie nunc.</p>
+    </section>
     <% if(isLogin){ %>
-    <a href="/admin/create-post">Add a new post as <%=  currentUserEmail ? currentUserEmail: ""%> </a>
+        <div class="login-div">
+            <div>
+                <a href="/admin/create-post">Add a new post as <%=  currentUserEmail ? currentUserEmail: ""%> </a>
+            <span>or</span>
     <form action="/logout" method="post">
       <input hidden value="<%= csrfToken%>" name="_csrf" />  
         <button>Logout</button>
     </form>
+            </div>
+        </div>
+    
     <% } else {%>
-    <a href="/login">Login </a>
-    <a href="/register">Rigister </a>
+        <div class="login-div">
+            <div>
+                <a href="/login">Login </a>
+                <span>or</span>
+                <a href="/register">Rigister </a>
+               </div>
+        </div>
     <% } %>
     <hr/>
     
-    <h1 class="title">Posts</h1>
+    <h1 class="title">Recent Posts</h1>
 
     <% if(postsArr.length===0 && isLogin) {%>
         <div>
@@ -24,19 +49,17 @@
         </div>
         <% } %>
 
-
+ <div class="post-container">
     <% for(let post of postsArr) {%>    
-
-    <div class="post-box">
-        <div>
+        <div class="post-box">
             <p class="post-title"><%= post.title%></p>
-            <p>Post by => <%= post.userId.email %></p> 
-           
+            <p class="post-email">Post by : <%= post.userId.email %></p> 
+            <p class="post-des"><%= post.description.substr(1,200)%></p>
+            <a class="btn" href="/post/<%= post._id %>">Read more...</a>
+            <hr>
         </div>
-        <p class="post-des">
-            
-         <a class="btn" href="/post/<%= post._id %>">See more...</a>
-        </p>
-    </div>
-    <% } %>
+        <% } %>
+        </div>
+    
+    
 <%- include("./includes/foot")%>

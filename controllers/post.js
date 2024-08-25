@@ -23,13 +23,13 @@ exports.renderHomePage = (req,res)=>{
     console.log(req.session.userInfo)
     console.log(req.session.isLogin)
     Post.find()
-    .select("title")
+    .select("title description")
     .populate("userId","email")
     .then((posts)=>{
     res.render("home",{
         title: "homepage" ,
         postsArr: posts,
-        currentUserEmail : req.session.userInfo.email ?
+        currentUserEmail : req.session.userInfo && req.session.userInfo.email ?
         req.session.userInfo.email: " ",
         })
 })
@@ -42,10 +42,10 @@ exports.getPost = (req,res)=>{
     const postId = req.params.postId;
     Post.findById(postId)
     .then((post)=>
-        res.render("details", {title: post.title ,post,currentLoginUserId: req.session.userInfo.email ?
+        res.render("details", {title: post.title ,
+            post,currentLoginUserId: req.session.userInfo ?
             req.session.userInfo._id: " ",}))
     .catch(err => console.log(err))
-    
 }
 
 exports.getEditPost = (req,res) => {
