@@ -3,7 +3,10 @@ const User = require("../model/user")
 const crypto = require("crypto")
 
 const nodemailer = require("nodemailer");
-const dotenv = require("dotenv").config()
+const dotenv = require("dotenv").config();
+
+const {validationResult} = require("express-validator");
+
 
 //created a transporter
 const transporter = nodemailer.createTransport({
@@ -34,7 +37,17 @@ exports.getRegisterPage = (req,res) =>{
                   : returns are used for many promises */
 exports.registerAccount = (req,res) => {
     const {email,password} =req.body;
-    console.log(email,password);
+
+    const errors = validationResult(req);
+  
+   if(!errors.isEmpty()){
+    return res.status(422)
+    .render("auth/register",
+        {title: "Register", 
+        errorMsg :errors.array()[0].msg})
+}
+ 
+    
     User.findOne({email})
     .then(user =>{if(user){
         req.flash("error","Email already exit");

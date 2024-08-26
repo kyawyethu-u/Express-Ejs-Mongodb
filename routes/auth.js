@@ -1,12 +1,25 @@
 const express = require("express")
 const router = express.Router();
+const {check} = require("express-validator")  //check method
+const User = require("../model/user")
 
 const authController = require("../controllers/auth")
 
 //render register page
 router.get("/register",authController.getRegisterPage);
 //handle register
-router.post("/register",authController.registerAccount);
+//async validation 
+router.post("/register",
+    check("email")
+    .isEmail()         //check email format is correct
+    .withMessage("Please enter a valid email address!")   //alert message or alert(errors.array()[0].msg) in controller
+    .custom((value, {req}) => { //value == email
+       return User.findOne({email: value})   
+        .then(user =>{if(user){
+            return Promise.reject("Email is already exit! Please choose another one.")
+        }
+    })})
+    ,authController.registerAccount);
 
 //render login page
 router.get("/login",authController.getLoginPage);
