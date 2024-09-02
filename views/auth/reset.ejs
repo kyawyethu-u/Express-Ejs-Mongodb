@@ -8,7 +8,7 @@
         <% } %>
 
     <form action="/reset" method="post">
-        <input hidden value="<%= csrfToken%>" name="_csrf" /> 
+        <input hidden value="<%= csrfToken%>" name="_csrf" value="<%= oldFormData.email%>"/> 
 
         <div><label for="email">Enter email</label>
             <input type="text" id="email" name="email" ></div>

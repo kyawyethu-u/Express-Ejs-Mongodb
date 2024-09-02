@@ -1,17 +1,29 @@
 const post = require("../model/post");
 const Post = require("../model/post")
+const {validationResult} = require("express-validator");
+const  {formatISO9075}  = require("date-fns");
 
 //render create page
 exports.renderCreatePage = (req,res)=>{
-  
     // res.sendFile(path.join(__dirname,"..","views","addpost.html"))
-    res.render("addpost",{title: "Post create"})//"addpost", value is must
-
+    res.render("addpost",{title: "Post create",
+        oldFormData: {title:"",description:"",photo:""},
+        errorMsg : "",
+    })//"addpost", value is must
 };
-
 //handle create post
 exports.createPost =(req,res)=>{
     const {title,description,photo} = req.body;
+
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422)
+        .render("addpost",{
+            title: "Post create",
+            errorMsg :errors.array()[0].msg,
+            oldFormData: {title,description,photo}})
+    }
+
        Post.create({title,description,img_url : photo, userId : req.user})
        .then(result => {
         res.redirect("/");
@@ -24,7 +36,7 @@ exports.renderHomePage = (req,res)=>{
     console.log(req.session.isLogin)
     Post.find()
     .select("title description")
-    .populate("userId","email")
+    .populate("userId","email")//userId is document refered
     .then((posts)=>{
     res.render("home",{
         title: "homepage" ,
@@ -33,21 +45,24 @@ exports.renderHomePage = (req,res)=>{
         req.session.userInfo.email: " ",
         })
 })
-    .catch(err => console.log(err))
-    
+    .catch(err => console.log(err)) 
 }
 
 
 exports.getPost = (req,res)=>{
     const postId = req.params.postId;
     Post.findById(postId)
+    .populate("userId", "email")
     .then((post)=>
-        res.render("details", {title: post.title ,
-            post,currentLoginUserId: req.session.userInfo ?
+        res.render("details", {
+            title: post.title ,
+            post,
+            date: post.createdAt ? formatISO9075(post.createdAt,{ representation: 'date' }) : undefined,
+            currentLoginUserId: req.session.userInfo ?
             req.session.userInfo._id: " ",}))
     .catch(err => console.log(err))
 }
-
+//render update post
 exports.getEditPost = (req,res) => {
     const postId = req.params.postId;
     Post.findById(postId)
@@ -55,13 +70,32 @@ exports.getEditPost = (req,res) => {
         if(!post){
             return res.redirect("/")
         }
-        res.render("editPost", {title: post.title, post})
+        res.render("editPost", {
+            postId: undefined,
+            title: post.title,
+            post,
+            oldFormData: {title:undefined,description:undefined,photo:undefined},
+            errorMsg : "",
+            isValidationFail: false,})
     })
     .catch(err => console.log(err))
 }
-
+//handle update post
 exports.updatePost = (req,res) => {
     const {postId,title,description,photo} = req.body;
+
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422)
+        .render("editPost",{
+            postId,
+            title,
+            errorMsg :errors.array()[0].msg,
+            oldFormData: {title,description,photo},
+            isValidationFail: true,
+            })
+    }
+
     Post.findById(postId)
     .then((post) => {// .toString is used cause of (!==, obj id to string)
         if(post.userId.toString() !== req.user._id.toString()){ 
@@ -76,11 +110,10 @@ exports.updatePost = (req,res) => {
             res.redirect("/");
         }))
     })
-   
     .catch(err => console.log(err))
-
 }
 
+//handle delete post
 exports.deletePost = (req,res) => {
     const {postId} = req.params;
    

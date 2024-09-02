@@ -22,6 +22,9 @@ const postSchema = new Schema({
         ref: "User", //for data taken
         required: true,
     }
-})
+},{
+    timestamps: true,
+}
+)
 
 module.exports = model("Post", postSchema)

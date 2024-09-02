@@ -26,7 +26,10 @@ exports.getRegisterPage = (req,res) =>{
     }else{
         message = null;
     }
-    res.render("auth/register",{title: "Register", errorMsg :message})
+    res.render("auth/register",{
+        title: "Register", 
+        errorMsg :message,
+        oldFormData : {email:"",password:""}})
 }
 
 //(handle register )
@@ -39,21 +42,15 @@ exports.registerAccount = (req,res) => {
     const {email,password} =req.body;
 
     const errors = validationResult(req);
-  
    if(!errors.isEmpty()){
     return res.status(422)
     .render("auth/register",
         {title: "Register", 
-        errorMsg :errors.array()[0].msg})
+        errorMsg :errors.array()[0].msg,
+        oldFormData : {email,password}})
 }
  
-    
-    User.findOne({email})
-    .then(user =>{if(user){
-        req.flash("error","Email already exit");
-        return res.redirect("/register");
-    }
-    return bcrypt.hash(password,10).then((hashedPassword)=>{
+      bcrypt.hash(password,10).then((hashedPassword)=>{
        return User.create({   
             email,
             password : hashedPassword
@@ -69,24 +66,37 @@ exports.registerAccount = (req,res) => {
         },
         (err)=>console.log(err));
     })
-})
-    .catch(err=>console.log(err));
 }
 
 //render login page
 exports.getLoginPage = (req,res) =>{
-    res.render("auth/login",{title: "Login", errorMsg : req.flash("error") })
+    res.render("auth/login",
+        {title: "Login", 
+        errorMsg : req.flash("error"),
+        oldFormData : {email:"",password:""}})
 }
 //(handle login)
 exports.postLoginData = (req,res) => {
    // req.session.isLogin = true;
     // res.redirect("/");
     const {email,password} = req.body;
+    
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+         res.status(422).
+        render("auth/login",{title: "Login",
+         errorMsg : errors.array()[0].msg,
+         oldFormData : {email,password}
+        })
+    }
     User.findOne({email})
     .then((user)=>{
         if(!user){//error message alert (key: value) when not found email/password
-            req.flash("error","Check your information and Try again");
-            return res.redirect("/login");
+        return res.status(422).
+        render("auth/login",{title: "Login",
+         errorMsg : "Please enter valid mail and password!",
+         oldFormData : {email,password}
+        });
 
         }
          bcrypt
@@ -101,7 +111,11 @@ exports.postLoginData = (req,res) => {
                 })
 
             }
-            res.redirect("/login")
+            res.status(422).
+         render("auth/login",{title: "Login",
+         errorMsg : "Password incorrect!",
+         oldFormData : {email,password}
+        })
         }).catch(err => console.log(err))
     })
     .catch(err => console.log(err))
@@ -123,7 +137,9 @@ exports.getResetpage = (req,res)=>{
     }else{
         message = null;
     }
-    res.render("auth/reset",{title: "Reset password", errorMsg :message})
+    res.render("auth/reset",{title: "Reset password", errorMsg :message,
+        oldFormData : {email:""}
+    })
 }
 //render feedback page
 exports.getFeedbackPage = (req,res)=>{
@@ -133,6 +149,15 @@ exports.getFeedbackPage = (req,res)=>{
 //reset password link send
 exports.resetLinksend = (req,res)=>{
     const {email} = req.body;
+
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+     return res.status(422)
+     .render("auth/reset",
+         {title: "Reset Password", 
+         errorMsg :errors.array()[0].msg,
+         oldFormData : {email}})
+ }
     //dynamic id generate(buffer  generated string)
         crypto.randomBytes(32,(err,buffer)=>{
             if(err){
@@ -143,15 +168,18 @@ exports.resetLinksend = (req,res)=>{
             User.findOne({email})
             .then((user)=>{
                 if(!user){
-                    req.flash("error","No account found with this email");
-                    return res.redirect("/reset-password");
+                return res.status(422).
+                render("auth/reset",{title: "Reset Password",
+                errorMsg : "No account exist with this email!!",
+                oldFormData : {email}
+            })
                 }
                 user.resetToken = token;
                 user.tokenExpiration = Date.now() + 1800000;
                 return user.save();
             })
             .then(result => {
-                res.redirect("/feedback");
+                return res.redirect("/feedback");
                 transporter.sendMail({
                     from: process.env.SENDER_MAIL,
                     to: email,
@@ -168,7 +196,9 @@ exports.resetLinksend = (req,res)=>{
     //
 exports.getNewpasswordPage = (req,res)=>{
     const {token} =req.params;
-    User.findOne({resetToken: token, tokenExpiration: {$gt: Date.now()}})
+    User.findOne({
+        resetToken: token, 
+        tokenExpiration: {$gt: Date.now()}})
     .then((user)=>{
         if(user){
             console.log(user)
@@ -182,7 +212,8 @@ exports.getNewpasswordPage = (req,res)=>{
                 title: "Change password",
                 errorMsg :message,
                 resetToken: token,
-                user_id: user._id})
+                user_id: user._id,
+                oldFormData : {password: "",confirm_password: ""}})
         }else{res.redirect("/")}
      } 
     )
@@ -192,6 +223,19 @@ exports.getNewpasswordPage = (req,res)=>{
 //
 exports.changeNewpassword = (req,res) => {
     const {password,confirm_password,user_id,resetToken} = req.body;
+    const errors = validationResult(req);
+
+    if(!errors.isEmpty()){
+        return res.status(422).
+        render("auth/new-password",{
+                    title: "Change password",
+                    errorMsg :errors.array()[0].msg,
+                    resetToken: token,
+                    user_id,
+                    oldFormData : {password,confirm_password}})
+                
+    }
+
     console.log(req.body)
     let resetUser;
     
@@ -200,12 +244,8 @@ exports.changeNewpassword = (req,res) => {
         tokenExpiration: {$gt: Date.now()},
         _id: user_id})
         .then((user)=>{
-            console.log(user)
-            if(password === confirm_password){
-                resetUser = user
-               return bcrypt.hash(password, 10)
-            }
-            
+            resetUser = user;
+            return bcrypt.hash(password, 10)
         })
         .then((hashedPassword) => {
              resetUser.password =hashedPassword;

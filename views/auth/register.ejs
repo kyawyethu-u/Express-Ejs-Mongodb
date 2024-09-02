@@ -8,9 +8,10 @@
     <form action="/register" method="post">
         <input hidden value="<%= csrfToken%>" name="_csrf" /> 
         <div><label for="email">Enter email</label>
-            <input type="text" id="email" name="email" ></div>
+            <input type="text" id="email" name="email" value="<%= oldFormData.email%>"></div>
+
         <div><label for="password">Enter password</label>
-                <input type="password" id="password" name="password" ></div>
+                <input type="password" id="password" name="password" value="<%= oldFormData.password%>"></div>
     
         <button>Sign up</button>
         </form>

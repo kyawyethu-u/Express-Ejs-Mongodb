@@ -1,21 +1,25 @@
 <%- include("./includes/head") %>
    <section class="mx-auto">
     <a href="/">Go back home</a>
-    <h1 class="title">Add a new page here!</h1>
+    <h1 class="title">Add a new post here!</h1>
+
+    <% if(errorMsg.length) {%>
+        <p class="msg-box"><%= errorMsg %></p>
+        <% } %>
     
-    <form action="/admin/edit-post" method="post">
+    <form action="/admin/edit-post" method="post" novalidate>
         <input hidden value="<%= csrfToken%>" name="_csrf" /> 
-        <input type="text" value="<%= post._id %>" name="postId" hidden>
+        <input type="text" value="<%= isValidationFail ? postId : post._id %>" name="postId" hidden>
         <div><label for="title">Enter title</label>
-            <input type="text" id="title" name="title" value="<%= post.title%>" required></div>
+            <input type="text" id="title" name="title" value="<%= isValidationFail ? oldFormData.title : post.title %>"  required></div>
         <div><label for="photo">Enter photo</label>
-               <input type="text" id="photo" name="photo" value="<%= post.img_url%>"required></div>
+               <input type="text" id="photo" name="photo" value="<%= isValidationFail ? oldFormData.photo : post.img_url%>"  required></div>
      
         <div><label for="description">Enter description</label>
             <textarea name="description" 
             id="description"
              cols="30" 
-             rows="10"><%= post.description%></textarea>
+             rows="10"><%= isValidationFail ? oldFormData.description : post.description%></textarea>
         <button>Update post</button>
         </form>
    </section>
