@@ -8,18 +8,22 @@ const mongoStore = require("connect-mongodb-session")(session);
 const {isLogin} = require("./middlewares/is-login")//middle work left to right
 const csrf = require("csurf")
 const flash = require('connect-flash');
-
+// work as order : middleware -> routes -> 
+                 
+                 
 
 const app = express();//server
 
- app.set("view engine","ejs");//engine
+ app.set("view engine","ejs");//template engine
  app.set("views","views")
 
-const postRoutes = require("./routes/post");//routes
+const postRoutes = require("./routes/post");//routes 
 const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
 
 const User = require("./model/user");//model
+
+const errorController = require("./controllers/error");//controller imp
 
 const store = new mongoStore({
   uri : process.env.MONGODB_URI,
@@ -49,9 +53,7 @@ app.use((req,res,next) => {
   .select("_id email")
   .then((user)=>{
     req.user = user;
-    
     next();
-
   })
 })
 
@@ -67,12 +69,15 @@ app.use("/admin", isLogin ,adminRoutes);//route define
 app.use(postRoutes);  
 app.use(authRoutes);
 
+//undefined route catcher and render 404
+app.all("*", errorController.get404Page)
+//error middleware()
+app.use( errorController.get500Page)
+
 mongoose.connect(process.env.MONGODB_URL)//connecting to database
 .then((_)=>{
     app.listen(8080);
     console.log("Connected to mongodb!!!");
-
-   
 })
 // .then(result => console.log(result))
 .catch((err)=>console.log(err))

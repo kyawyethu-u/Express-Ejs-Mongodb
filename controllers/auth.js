@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 
 
     //render register page
-exports.getRegisterPage = (req,res) =>{
+exports.getRegisterPage = (req,res,next) =>{
     let message = req.flash("error");
     if(message.length > 0){
         message = message[0];
@@ -38,7 +38,7 @@ exports.getRegisterPage = (req,res) =>{
                   : return register ;
                   : else User.create() after created hashedPassword)
                   : returns are used for many promises */
-exports.registerAccount = (req,res) => {
+exports.registerAccount = (req,res,next) => {
     const {email,password} =req.body;
 
     const errors = validationResult(req);
@@ -64,19 +64,22 @@ exports.registerAccount = (req,res) => {
             subject: "Register Sucessful",
             html: "<h1>Register account Sucessful.</h1><p>Created an account using this email in blog.io.</p>",
         },
-        (err)=>console.log(err));
+        (err)=>{console.log(err);
+            const error = new Error("Something went wrong!");
+            return next(error)
+        });
     })
 }
 
 //render login page
-exports.getLoginPage = (req,res) =>{
+exports.getLoginPage = (req,res,next) =>{
     res.render("auth/login",
         {title: "Login", 
         errorMsg : req.flash("error"),
         oldFormData : {email:"",password:""}})
 }
 //(handle login)
-exports.postLoginData = (req,res) => {
+exports.postLoginData = (req,res,next) => {
    // req.session.isLogin = true;
     // res.redirect("/");
     const {email,password} = req.body;
@@ -118,19 +121,22 @@ exports.postLoginData = (req,res) => {
         })
         }).catch(err => console.log(err))
     })
-    .catch(err => console.log(err))
+    .catch(err => {console.log(err);
+        const error = new Error("Something went wrong!");
+        return next(error)
+    })
 
 }
 
 //handle logout
-exports.logout = (req,res) =>{
+exports.logout = (req,res,next) =>{
     req.session.destroy(_=>{
         res.redirect("/");
     })
 }
 
 //render reset password page
-exports.getResetpage = (req,res)=>{
+exports.getResetpage = (req,res,next)=>{
     let message = req.flash("error");
     if(message.length > 0){
         message = message[0];
@@ -142,12 +148,12 @@ exports.getResetpage = (req,res)=>{
     })
 }
 //render feedback page
-exports.getFeedbackPage = (req,res)=>{
+exports.getFeedbackPage = (req,res,next)=>{
    res.render("auth/feedback",{title: "Success."})
 }
 
 //reset password link send
-exports.resetLinksend = (req,res)=>{
+exports.resetLinksend = (req,res,next)=>{
     const {email} = req.body;
 
     const errors = validationResult(req);
@@ -187,14 +193,17 @@ exports.resetLinksend = (req,res)=>{
                     html: `<h1>Reset password now</h1><p>Change your account password by clicking the link below</p><a href="http://localhost:8080/reset-password/${token}" target="_blank">Click here to change password !!</a>`,
                 },
                 (err)=>console.log(err));
-            }).catch(err => {console.log(err)})
+            }).catch(err => {console.log(err);
+                const error = new Error("Something went wrong!");
+                 return next(error)
+            })
         })
 }
 
 //render changed password page
 //  :$gt (greater than)
     //
-exports.getNewpasswordPage = (req,res)=>{
+exports.getNewpasswordPage = (req,res,next)=>{
     const {token} =req.params;
     User.findOne({
         resetToken: token, 
@@ -217,11 +226,14 @@ exports.getNewpasswordPage = (req,res)=>{
         }else{res.redirect("/")}
      } 
     )
-    .catch(err => {console.log(err)})
+    .catch(err => {console.log(err);
+        const error = new Error("Something went wrong!");
+        return next(error)
+    })
 }
 
 //
-exports.changeNewpassword = (req,res) => {
+exports.changeNewpassword = (req,res,next) => {
     const {password,confirm_password,user_id,resetToken} = req.body;
     const errors = validationResult(req);
 
@@ -255,5 +267,8 @@ exports.changeNewpassword = (req,res) => {
         }).then(() => {
             res.redirect("login")
         })
-        .catch(err=>console.log(err))
+        .catch(err=>{console.log(err);
+            const error = new Error("Something went wrong!");
+            return next(error)
+        })
 }

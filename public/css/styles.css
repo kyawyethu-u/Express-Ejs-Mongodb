@@ -97,6 +97,20 @@
     justify-content: space-between;
 }
 
+.four{
+    text-align: center;
+    margin-top: 40px;
+}
+.four h1{
+    font-size: 50px;
+}
+.flex-center{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* a global style*/
 a{
     display: block;
     margin: 10px 0;

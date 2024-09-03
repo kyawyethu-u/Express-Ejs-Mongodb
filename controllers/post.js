@@ -4,7 +4,7 @@ const {validationResult} = require("express-validator");
 const  {formatISO9075}  = require("date-fns");
 
 //render create page
-exports.renderCreatePage = (req,res)=>{
+exports.renderCreatePage = (req,res,next)=>{
     // res.sendFile(path.join(__dirname,"..","views","addpost.html"))
     res.render("addpost",{title: "Post create",
         oldFormData: {title:"",description:"",photo:""},
@@ -12,7 +12,7 @@ exports.renderCreatePage = (req,res)=>{
     })//"addpost", value is must
 };
 //handle create post
-exports.createPost =(req,res)=>{
+exports.createPost =(req,res,next)=>{
     const {title,description,photo} = req.body;
 
     const errors = validationResult(req);
@@ -27,11 +27,15 @@ exports.createPost =(req,res)=>{
        Post.create({title,description,img_url : photo, userId : req.user})
        .then(result => {
         res.redirect("/");
- }).catch(err => console.log(err))
+ }).catch(err => {
+    console.log(err);
+    const error = new Error("Something went wrong!");
+        return next(error)
+ })
 };
 
 //render home page
-exports.renderHomePage = (req,res)=>{
+exports.renderHomePage = (req,res,next)=>{
     console.log(req.session.userInfo)
     console.log(req.session.isLogin)
     Post.find()
@@ -45,11 +49,14 @@ exports.renderHomePage = (req,res)=>{
         req.session.userInfo.email: " ",
         })
 })
-    .catch(err => console.log(err)) 
+    .catch(err => {console.log(err);
+        const error = new Error("Something went wrong!");
+        return next(error)
+    }) 
 }
 
 
-exports.getPost = (req,res)=>{
+exports.getPost = (req,res,next)=>{
     const postId = req.params.postId;
     Post.findById(postId)
     .populate("userId", "email")
@@ -60,10 +67,15 @@ exports.getPost = (req,res)=>{
             date: post.createdAt ? formatISO9075(post.createdAt,{ representation: 'date' }) : undefined,
             currentLoginUserId: req.session.userInfo ?
             req.session.userInfo._id: " ",}))
-    .catch(err => console.log(err))
+    .catch((err) =>{
+         console.log(err);
+         const error = new Error("Post did not find with this ID");
+         return next(error);
+        })
 }
+
 //render update post
-exports.getEditPost = (req,res) => {
+exports.getEditPost = (req,res,next) => {
     const postId = req.params.postId;
     Post.findById(postId)
     .then((post)=>{
@@ -78,10 +90,14 @@ exports.getEditPost = (req,res) => {
             errorMsg : "",
             isValidationFail: false,})
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+        console.log(err)
+        const error = new Error("Something went wrong!");
+         return next(error)}
+    )
 }
 //handle update post
-exports.updatePost = (req,res) => {
+exports.updatePost = (req,res,next) => {
     const {postId,title,description,photo} = req.body;
 
     const errors = validationResult(req);
@@ -110,11 +126,14 @@ exports.updatePost = (req,res) => {
             res.redirect("/");
         }))
     })
-    .catch(err => console.log(err))
+    .catch(err =>{
+        console.log(err);
+         const error = new Error("Something went wrong");
+        return next(error)})
 }
 
 //handle delete post
-exports.deletePost = (req,res) => {
+exports.deletePost = (req,res,next) => {
     const {postId} = req.params;
    
     Post.deleteOne({_id: postId, userId : req.user._id})
@@ -122,5 +141,9 @@ exports.deletePost = (req,res) => {
         console.log("Post deleted!!!");
         res.redirect("/");
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+        console.log(err);
+        const error = new Error("Something went wrong!");
+         return next(error)
+    });
 }
