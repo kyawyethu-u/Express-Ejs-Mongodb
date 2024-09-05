@@ -1,5 +1,5 @@
 const express = require("express");
-const path = require("path")
+const path = require("path"); // file path module import
 const bodyparser = require("body-parser");
 const mongoose = require("mongoose")
 const dotenv = require("dotenv").config();
@@ -8,10 +8,12 @@ const mongoStore = require("connect-mongodb-session")(session);
 const {isLogin} = require("./middlewares/is-login")//middle work left to right
 const csrf = require("csurf")
 const flash = require('connect-flash');
-// work as order : middleware -> routes -> 
+const multer = require("multer");
+/*server work work as order :  middleware work top to bottom(line by line syncronusly)
+                            : inline work left to right
+                            : middleware manipulate between client vs server
+                 */
                  
-                 
-
 const app = express();//server
 
  app.set("view engine","ejs");//template engine
@@ -23,7 +25,7 @@ const authRoutes = require("./routes/auth");
 
 const User = require("./model/user");//model
 
-const errorController = require("./controllers/error");//controller imp
+const errorController = require("./controllers/error");//controller import
 
 const store = new mongoStore({
   uri : process.env.MONGODB_URI,
@@ -32,8 +34,33 @@ const store = new mongoStore({
 
 const csrfProtect = csrf(); //  called token
 
-app.use(express.static(path.join(__dirname, "public")));//middleware
-app.use(bodyparser.urlencoded({extended: false}))
+//multer's storage engine
+const storageConfigure = multer.diskStorage({
+  destination: (req,file,cb) => {
+      cb(null,"uploads")
+  },
+  filename: (req,file,cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      cb(null,uniqueSuffix + '-' + file.originalname)
+  }
+})
+
+//validation with filefilter using multer
+const filefilterConfigure = (req,file,cb) => {
+  if(file.mimetype ==="image/png" ||
+     file.mimetype ==="image/jpg" ||
+     file.mimetype ==="image/jpeg" ) {
+    cb(null,true)
+  }else{
+    cb(null,false);
+  }
+}
+app.use(express.static(path.join(__dirname, "public")));//middleware(for access directory)
+app.use("/uploads",express.static(path.join(__dirname, "uploads")));//.join method join file path each other
+app.use(bodyparser.urlencoded({extended: false}));
+app.use(multer({
+  storage: storageConfigure,
+  filefilter: filefilterConfigure}).single("photo"))
 app.use(session({
     secret : process.env.SESSION_KEY,
     resave : false,

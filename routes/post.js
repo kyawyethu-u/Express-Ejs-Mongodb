@@ -6,9 +6,11 @@ const {posts} = require("./admin");
 
 const postController = require("../controllers/post");//import
 
-
 router.get("/",postController.renderHomePage);
+
 router.get("/post/:postId",postController.getPost);//postId is key
+
+router.get("/save/:id",postController.savePostAsPDF);
 
 
 

@@ -7,18 +7,24 @@
         <p class="msg-box"><%= errorMsg %></p>
         <% } %>
     
-    <form action="/admin" method="post" novalidate>
+    <form action="/admin" method="post" enctype="multipart/form-data">
         <input hidden value="<%= csrfToken%>" name="_csrf" /> 
-        <div><label for="title">Enter title</label>
-            <input type="text" id="title" name="title" required value="<%= oldFormData.title%>"></div>
-        <div><label for="photo">Enter photo</label>
-               <input type="text" id="photo" name="photo" required value="<%= oldFormData.photo%>"></div>
+        <div>
+            <label for="title">Enter title</label>
+            <input type="text" id="title" name="title" required value="<%= oldFormData.title%>">
+        </div>
+        <div>
+            <label for="photo">Enter photo</label>
+               <input type="file" id="photo" name="photo" required >
+            </div>
      
-        <div><label for="description" >Enter description</label>
+        <div>
+            <label for="description" >Enter description</label>
             <textarea name="description" 
             id="description"
              cols="30" 
              rows="10"><%= oldFormData.description%></textarea>
+        </div>
         <button>Add post</button>
         </form>
    </section>

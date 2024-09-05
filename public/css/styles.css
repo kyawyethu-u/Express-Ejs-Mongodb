@@ -20,6 +20,10 @@
 .header p{
     font-size: 20px;
 }
+.pl-80{
+    padding-left: 80px;
+}
+
 .login-div,
 .login-div div{
     display: flex;

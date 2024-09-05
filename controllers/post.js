@@ -1,7 +1,13 @@
-const post = require("../model/post");
+// const post = require("../model/post");
 const Post = require("../model/post")
 const {validationResult} = require("express-validator");
 const  {formatISO9075}  = require("date-fns");
+const fileDelete = require("../utils/fileDelete");
+
+
+const pdf = require("pdf-creator-node");
+const fs = require("fs");
+const expath = require("path")
 
 //render create page
 exports.renderCreatePage = (req,res,next)=>{
@@ -13,18 +19,27 @@ exports.renderCreatePage = (req,res,next)=>{
 };
 //handle create post
 exports.createPost =(req,res,next)=>{
-    const {title,description,photo} = req.body;
-
+    const {title,description} = req.body;
+    const image = req.file;
     const errors = validationResult(req);
+
+    if(image === undefined){
+        return res.status(422)
+        .render("addpost",{
+            title: "Post create",
+            errorMsg :"Image extension must be jpg,jpeg and png",
+            oldFormData: {title,description}})
+    }
+    
     if(!errors.isEmpty()){
         return res.status(422)
         .render("addpost",{
             title: "Post create",
             errorMsg :errors.array()[0].msg,
-            oldFormData: {title,description,photo}})
+            oldFormData: {title,description}})
     }
-
-       Post.create({title,description,img_url : photo, userId : req.user})
+            //store in db
+       Post.create({title, description, img_url : image.path, userId : req.user})
        .then(result => {
         res.redirect("/");
  }).catch(err => {
@@ -86,7 +101,8 @@ exports.getEditPost = (req,res,next) => {
             postId: undefined,
             title: post.title,
             post,
-            oldFormData: {title:undefined,description:undefined,photo:undefined},
+            oldFormData: {title:undefined,
+                description:undefined},
             errorMsg : "",
             isValidationFail: false,})
     })
@@ -98,16 +114,27 @@ exports.getEditPost = (req,res,next) => {
 }
 //handle update post
 exports.updatePost = (req,res,next) => {
-    const {postId,title,description,photo} = req.body;
-
+    const {postId,title,description} = req.body;
+    const image = req.file;
     const errors = validationResult(req);
+
+    // if(image === undefined){
+    //     return res.status(422)
+    //     .render("editPost",{
+    //         postId,
+    //         title,
+    //         isValidationFail: true,
+    //         errorMsg :"Image extension must be jpg,jpeg and png",
+    //         oldFormData: {title,description}})
+    // }
+   
     if(!errors.isEmpty()){
         return res.status(422)
         .render("editPost",{
             postId,
             title,
             errorMsg :errors.array()[0].msg,
-            oldFormData: {title,description,photo},
+            oldFormData: {title,description},
             isValidationFail: true,
             })
     }
@@ -119,9 +146,12 @@ exports.updatePost = (req,res,next) => {
         }
         post.title = title;
         post.description = description;
-        post.img_url = photo;
+       if(image){
+        fileDelete(post.img_url)      
+        post.img_url = image.path;
+       }
         return post.save()
-          .then((result => {
+    .then((result => {
             console.log(result);
             res.redirect("/");
         }))
@@ -135,15 +165,78 @@ exports.updatePost = (req,res,next) => {
 //handle delete post
 exports.deletePost = (req,res,next) => {
     const {postId} = req.params;
-   
-    Post.deleteOne({_id: postId, userId : req.user._id})
-    .then(result => {
-        console.log("Post deleted!!!");
-        res.redirect("/");
+   Post.findById(postId)
+   .then((post)=>{
+        if(!post){
+            return res.redirect("/")
+        }
+        fileDelete(post.img_url); //delete local storage
+ return   Post.deleteOne({_id: postId, userId : req.user._id})})
+   .then(result => {             //deleting database post's info
+            console.log("Post deleted!!!");
+            res.redirect("/");
+        })
+   .catch(err => {
+    console.log(err);
+    const error = new Error("Something went wrong!");
+     return next(error)})
+}
+
+exports.savePostAsPDF = (req,res,next) =>{
+ const {id} = req.params
+ console.log(typeof(id))
+ const templateUrl = `${expath.join(__dirname,"../views/template/template.html")}`
+   const html = fs.readFileSync(templateUrl,"utf8");//read template.html/utf8
+   const options = {
+    format: "A3",
+    orientation: "portrait",
+    border: "10mm",
+    header: {
+        height: "45mm",
+        contents: '<div style="text-align: center;">PDF DOWNLOAD FROM BLOG.IO</div>'
+    },
+    footer: {
+        height: "28mm",
+        contents: {
+            first: 'Cover page',
+            contents: '<span style="color: #444; text-align: center;">Energy</span>', // fallback value
+            last: 'Last Page'
+        }
+    }
+}
+    Post.findById(id)
+    .populate("userId", "email")
+    .lean()
+    .then((post)=>{
+        console.log(post)
+        const date = new Date();
+        const pdfSaveURL = `${expath.join(__dirname,"../public/pdf",date.getTime() + ".pdf")}`
+        //public/pdf/12345123.pdf
+        const document = {
+           html,
+           data: {
+               post
+           },
+           path: pdfSaveURL,
+           type: ""
+        }
+   pdf.create(document, options)
+     .then((result) => {
+        console.log(result);
+        res.download(pdfSaveURL,(err)=>{
+            if(err) throw (err)
+                fileDelete(pdfSaveURL);
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
     })
     .catch(err => {
-        console.log(err);
-        const error = new Error("Something went wrong!");
-         return next(error)
-    });
+    console.log(err);
+    const error = new Error("Something went wrong!");
+     return next(error)})
+     
+
 }
