@@ -4,10 +4,12 @@ const {validationResult} = require("express-validator");
 const  {formatISO9075}  = require("date-fns");
 const fileDelete = require("../utils/fileDelete");
 
-
 const pdf = require("pdf-creator-node");
 const fs = require("fs");
-const expath = require("path")
+const expath = require("path");
+const { Console } = require("console");
+
+const POST_PAR_PAGE = 6;
 
 //render create page
 exports.renderCreatePage = (req,res,next)=>{
@@ -49,20 +51,42 @@ exports.createPost =(req,res,next)=>{
  })
 };
 
-//render home page
+//render home page 
+//be careful (+req.query.page || 1)
 exports.renderHomePage = (req,res,next)=>{
-    console.log(req.session.userInfo)
-    console.log(req.session.isLogin)
-    Post.find()
-    .select("title description")
+    const pageNumber = +req.query.page || 1;
+ 
+    let totalPostNumber;
+    Post.find().countDocuments()
+    .then(totalPostCount => {
+        totalPostNumber = totalPostCount;
+        
+     return Post.find()
+    .select("title description img_url")
     .populate("userId","email")//userId is document refered
+    .skip((pageNumber-1) * POST_PAR_PAGE)
+    .limit(POST_PAR_PAGE)
+    .sort({createdAt: -1})
+    })
     .then((posts)=>{
-    res.render("home",{
-        title: "homepage" ,
-        postsArr: posts,
-        currentUserEmail : req.session.userInfo && req.session.userInfo.email ?
-        req.session.userInfo.email: " ",
-        })
+        if(posts.length > 0){
+          return  res.render("home",{
+                title: "homepage" ,
+                postsArr: posts,
+                currentUserEmail : req.session.userInfo && req.session.userInfo.email ?
+                req.session.userInfo.email: " ",
+                currentPage : pageNumber,
+                hasNextPage: POST_PAR_PAGE * pageNumber < totalPostNumber,
+                hasPreviousPage: pageNumber > 1,
+                nextPage: pageNumber + 1,
+                previousPage: pageNumber - 1,
+                })
+
+        }else{
+           return res.status(500).render("error/500", {
+                title :"Something went wrong!",
+                message: "No posts in this page"});
+        }
 })
     .catch(err => {console.log(err);
         const error = new Error("Something went wrong!");
@@ -192,18 +216,15 @@ exports.savePostAsPDF = (req,res,next) =>{
     orientation: "portrait",
     border: "10mm",
     header: {
-        height: "45mm",
+        height: "20mm",
         contents: '<div style="text-align: center;">PDF DOWNLOAD FROM BLOG.IO</div>'
     },
     footer: {
-        height: "28mm",
-        contents: {
-            first: 'Cover page',
+        height: "15mm",
             contents: '<span style="color: #444; text-align: center;">Energy</span>', // fallback value
-            last: 'Last Page'
         }
     }
-}
+
     Post.findById(id)
     .populate("userId", "email")
     .lean()

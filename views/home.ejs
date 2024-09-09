@@ -1,47 +1,8 @@
 <%- include("./includes/head") %>
     <section class="header">
-    <h1 class="title">Blog.io</h1>
-    <p class="description">Lorem ipsum dolor sit amet consectetur adipiscing elit lobortis scelerisque
-         magna ultricies, ac sagittis pellentesque iaculis senectus sollicitudin 
-         egestas dapibus aptent. Feugiat habitant interdum class felis velit platea fermentum 
-         himenaeos dignissim, curabitur ridiculus sed magna aptent metus odio lectus eu, porttitor
-          fusce risus netus ornare urna sociosqu nulla. Donec dictumst accumsan ad vulputate luctus
-           feugiat porta quis, iaculis semper volutpat egestas cubilia massa mi leo, aptent suspendisse
-            magna duis eleifend molestie nunc.Lorem ipsum dolor sit amet consectetur adipiscing elit lobortis scelerisque
-            magna ultricies, ac sagittis pellentesque iaculis senectus sollicitudin 
-            egestas dapibus aptent. Feugiat habitant interdum class felis velit platea fermentum 
-            himenaeos dignissim, curabitur ridiculus sed magna aptent metus odio lectus eu, porttitor
-             fusce risus netus ornare urna sociosqu nulla. Donec dictumst accumsan ad vulputate luctus
-              feugiat porta quis, iaculis semper volutpat egestas cubilia massa mi leo, aptent suspendisse
-               magna duis eleifend molestie nunc.</p>
-    </section>
-    <% if(isLogin){ %>
-        <div class="login-div">
-            <div>
-                <a href="/admin/create-post">Add a new post as <%=  currentUserEmail ? currentUserEmail: ""%> </a>
-            <span>or</span>
-    <form action="/logout" method="post">
-      <input hidden value="<%= csrfToken%>" name="_csrf" />  
-        <button>Logout</button>
-    </form>
-            </div>
-        </div>
-    
-    <% } else {%>
-        <div class="login-div">
-            <div>
-                <a href="/login">Login </a>
-                <span>or</span>
-                <a href="/register">Rigister </a>
-               </div>
-        </div>
-    <% } %>
-    <hr/>
-    
     <h1 class="title">Recent Posts</h1>
-
     <% if(postsArr.length===0 && isLogin) {%>
-        <div class="pl-80">
+        <div>
             <h4>Nothing to see ?</h4>
             <p>Create a new post now !!! </p>
             <a href="/admin/create-post">Create a new post! </a>
@@ -52,14 +13,25 @@
  <div class="post-container">
     <% for(let post of postsArr) {%>    
         <div class="post-box">
-            <p class="post-title"><%= post.title%></p>
-            <p class="post-email">Post by : <%= post.userId.email %></p> 
-            <p class="post-des"><%= post.description.substr(1,200)%></p>
-            <a class="btn" href="/post/<%= post._id %>">Read more...</a>
+            <img src="<%= `/` + post.img_url %>" alt="<%= post.title%>" class="post-box-img">
+            <a class="post-title" href="/post/<%= post._id %>"><%= post.title.substr(0,10)%></a> 
+            <p class="post-des"><%= post.description.substr(0,100)%></p>
             <hr>
+            <p class="post-email">Post by : <%= post.userId.email %></p>
         </div>
         <% } %>
         </div>
-    
+  
+    <div class="paginate">
+        <% if(!hasNextPage && currentPage == 1) {%>
+            <a href="/?page=2">Next Page</a>
+            <% } %>
+        <% if(hasNextPage) {%>
+            <a href="/?page=<%= nextPage%>">Next Page<%= nextPage%></a>
+            <% } %>
+        <% if(hasPreviousPage) {%>
+            <a href="/?page=<%= previousPage%>">Previous Page<%= previousPage%></a>
+            <% } %>
+    </div>
     
 <%- include("./includes/foot")%>
