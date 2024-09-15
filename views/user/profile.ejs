@@ -1,0 +1,53 @@
+<%- include("../includes/head") %>
+<section class="header">
+   
+   <div class="own-user">
+   <div class="ic-email">
+    <i class="fa-solid fa-circle-user "></i>
+    <p class=""><%= currentUserEmail %></p>
+    <p class="">
+        <% if(postsArr[0].userId.username){ %>
+            <p class="premium-username"><%= postsArr[0].userId.username %>
+                <% if(postsArr[0].userId.isPremium){ %>
+                <i class="fa-regular fa-star animate__animated animate__jello animate__infinite	infinite"></i>
+                <%}%>
+            </p>
+        <%}else{%>
+            <p class="premium-username"><%= postsArr[0].userId.username %><i class="fa-solid fa-star"></i></p>
+            <%}%>
+    </p>
+   </div>
+   <div class="own-user-right">
+    <a href="/admin/username">Set username</a>
+    <a href="/admin/premium">Buy Premium</a>
+   </div>
+   </div>
+
+   <div class="post-container">
+      <% for(let post of postsArr) {%>    
+          <div class="post-box">
+              <img src="<%= `/` + post.img_url %>" alt="<%= post.title%>" class="post-box-img">
+              <a class="post-title" href="/post/<%= post._id %>"><%= post.title.substr(0,10)%></a> 
+              <p class="post-des"><%= post.description.substr(0,100)%></p>
+              <hr>
+              <p class="post-email">Post by : <%= post.userId.email %></p>
+          </div>
+          <% } %>
+          </div>
+    
+      <div class="paginate">
+          <!-- <% if(!hasNextPage ) {%>
+              <a href="admin/profile/?page=2">Next Page</a>
+              <% } %> -->
+          <% if(hasNextPage) {%>
+              <a href="admin/profile/?page=<%= nextPage%>">Next Page<%= nextPage%></a>
+              <% } %>
+          <% if(hasPreviousPage) {%>
+              <a href="admin/profile/?page=<%= previousPage%>">Previous Page<%= previousPage%></a>
+              <% } %>
+      </div>
+</section>
+
+
+
+<%- include("../includes/foot")%>

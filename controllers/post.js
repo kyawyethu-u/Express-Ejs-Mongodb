@@ -80,6 +80,7 @@ exports.renderHomePage = (req,res,next)=>{
                 hasPreviousPage: pageNumber > 1,
                 nextPage: pageNumber + 1,
                 previousPage: pageNumber - 1,
+                currentUserID: req.session.userInfo ? req.session.userInfo._id: "",
                 })
 
         }else{
@@ -176,7 +177,7 @@ exports.updatePost = (req,res,next) => {
        }
         return post.save()
     .then((result => {
-            console.log(result);
+            console.log("Post updated!");
             res.redirect("/");
         }))
     })

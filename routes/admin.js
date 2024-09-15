@@ -3,6 +3,7 @@ const {body} = require("express-validator")
 
 const router = express.Router()
 const postController = require("../controllers/post")
+const userController = require("../controllers/user")
 
 
 
@@ -25,7 +26,22 @@ router.post("/edit-post",
     ,postController.updatePost)
 
 //handle delete 
-router.post("/delete/:postId",postController.deletePost)
+router.post("/delete/:postId",postController.deletePost);
+
+// render profile
+router.get("/profile",userController.getProfile);
+
+//render username.ejs
+router.get("/username",userController.renderUsernamepage);
+//handle username
+router.post("/setusername",
+     body("username").isLength({min: 4}).withMessage("Username must have 4 letters")
+    ,userController.setUsername);
+
+//render premium.ejs
+router.get("/premium",userController.renderPremiumpage)   
+//render subscription-success
+router.get("/subscription-success",userController.getSuccessPage)
 
 module.exports =  router;
 

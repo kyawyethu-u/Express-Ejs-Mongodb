@@ -1,0 +1,27 @@
+<%- include("../includes/head") %>
+<section class="premium">
+    <div class="card">
+        <h1>IO premium</h1>
+        <ul>
+            <li>Can save post as Pdf file</li>
+            <li>Animate profile bradge</li>
+            <li>Can set username unlimiatted</li>
+            <li>Unlimitted download</li>
+
+        </ul>
+        <button class="checkout-btn">Buy IO premium</button>
+        <script src="https://js.stripe.com/v3/"></script>
+        <script>
+            var stripe = Stripe("pk_test_51PyViqRvTBdt3nYpfmUmb4sS9uk6qOPg4xKh2lzyoHPQCfRvCOpBDyNhmP2KO1Jaa3EKT4RNpFO7r1BF1upD5HHG00cO1aOsjf")
+            var checkoutBtn = document.querySelector(".checkout-btn")
+            checkoutBtn.addEventListener("click",function(){
+                stripe.redirectToCheckout({
+                    sessionId : "<%= session_id%>"
+                })
+            })
+        </script>
+    </div>
+
+
+</section>
+<%- include("../includes/foot")%>

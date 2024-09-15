@@ -1,5 +1,5 @@
 <%- include("./includes/head") %>
-    <section class="header">
+<section class="header">
     <h1 class="title">Recent Posts</h1>
     <% if(postsArr.length===0 && isLogin) {%>
         <div>
@@ -17,7 +17,16 @@
             <a class="post-title" href="/post/<%= post._id %>"><%= post.title.substr(0,10)%></a> 
             <p class="post-des"><%= post.description.substr(0,100)%></p>
             <hr>
-            <p class="post-email">Post by : <%= post.userId.email %></p>
+
+            <% if(post.userId._id.toString() === currentUserID.toString()) {%>
+            <a href="/admin/profile" class="post-email"></a>
+                <span>Post by : </span><%= post.userId.email %>
+            </a>
+            <%} else{%>
+            <a href="/profile/<%= post.userId._id %>" class="post-email">
+                <span>Post by : </span><%= post.userId.email %>
+            </a>
+            <%}%>
         </div>
         <% } %>
         </div>
@@ -33,5 +42,6 @@
             <a href="/?page=<%= previousPage%>">Previous Page<%= previousPage%></a>
             <% } %>
     </div>
+</section>
     
 <%- include("./includes/foot")%>

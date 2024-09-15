@@ -25,12 +25,8 @@ a{
     width: fit-content;
     text-decoration: underline;
 }
-/* for go back btn*/
-.gb-btn{
-    margin: 0 0;
-    
-}
 
+/*for nav*/
 nav{
     width: 60%;
     margin: 0 auto;
@@ -79,9 +75,11 @@ nav .right-side{
     margin-bottom: 8px;
 }
 .post-email{
+    font-size: 15px;
+    margin: 10px 0;
     font-weight: 600;
-    font-size: 19px;
-    margin: 4px 0;
+    display: inline-block;
+    text-decoration: none !important;
 }
 /*for details*/
 .details{
@@ -176,6 +174,37 @@ input,textarea{
     padding: 4px 10px;
     width: 100%;
 }
+/*public-profile-icon vs profile-icon*/
+.public-user{
+    text-align: center;
+    margin: 20px 0;
+}
+.public-user i,.own-user i{
+    font-size: 5rem;
+}
+.own-user{
+    display: flex;
+    margin: 40px 0 20px 0;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+.own-user .ic-email{
+    text-align: center;
+}
+.own-user-right a{
+    text-align: center;
+    width: 100%;
+}
+.premium-username i{
+    font-size: 18px;
+
+}
+
+/* for go back btn*/
+.gb-btn{
+    margin: 0 0;
+}
+/*for btn*/
 
 button , .btn-full{
     margin: 10px 0;
@@ -201,4 +230,42 @@ button , .btn-full{
     border: 1px solid red;
     background-color: rgb(245, 163, 163);
     padding: 4px 10px;
+}
+
+/*premium */
+.premium{
+    width: 60%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+}
+.card{
+    padding: 20px 20px;
+    border: 2px solid black;
+    border-radius: 8px;
+   
+}
+.card h1{
+    font-size: 27px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.card .checkout-btn {
+    background-color: #000;
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+}
+.card ul li{
+    list-style: none;
+    margin-bottom: 10px;
+    font-size: 18px;
+
+}
+.checkout-btn{
+
 }

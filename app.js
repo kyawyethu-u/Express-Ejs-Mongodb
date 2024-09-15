@@ -71,7 +71,9 @@ app.use(session({
 app.use(csrfProtect);//registered as a middleware to generate a csrf token from server and use to check while form submit by user if(csrfToken)
 app.use(flash()); //registered connect-flash package
 
-//Custom middleware
+/*Custom middleware: if isLogin: true, 
+                      whenever every route render
+                      findById=> send it ro user */
 app.use((req,res,next) => {
   if(req.session.isLogin === undefined){
     return next();
